@@ -19,11 +19,14 @@ PLANET_RADII = {
 
 # FUNCS
 def correctPlanetNames(planets):
+	nplanets = []
 	for planet in planets:
 		if planet in ['mercury', 'jupiter', 'pluto', 'uranus', 'saturn', 'neptune']:
-			planet = planet + " barycenter"
+			nplanets.append(planet + " barycenter")
+		else:
+			nplanets.append(planet)
 
-	return planets
+	return nplanets
 
 def checkPlanetsSupport(planets, sm=False):
 	for planet in planets:

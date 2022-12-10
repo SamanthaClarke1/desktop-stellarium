@@ -3,7 +3,7 @@
 import typer
 from index import findSunSetRise, findPlanetRadius, findGreatestElongation, generateElongationChart
 from rich import print
-from helpers import loadConfig, PLANET_RADII, checkPlanetsSupport
+from helpers import loadConfig, PLANET_RADII, checkPlanetsSupport, correctPlanetNames
 
 main = typer.Typer()
 CONFIG = loadConfig()
@@ -74,6 +74,7 @@ def chart(chart = typer.Argument(..., help="The name of the chart. E.g. elongati
 	"""
 	Generates various charts
 	"""
+	planeta, planetb = correctPlanetNames([planeta, planetb])
 	generateElongationChart(planeta, planetb)
 
 if __name__ == "__main__":
