@@ -70,12 +70,16 @@ def find_elongation(planeta: str = typer.Argument(..., help="The first planet. E
 	findGreatestElongation(planeta, planetb)
 
 @main.command()
-def chart(chart = typer.Argument(..., help="The name of the chart. E.g. elongation"), planeta: str = typer.Argument(..., help="The first planet. E.g. 'venus'"), planetb: str = typer.Argument(..., help="The second planet. E.g. 'sun'")):
+def chart(chart = typer.Argument(..., help="The name of the chart. E.g. elongation"), 
+	planeta: str = typer.Argument(..., help="The first planet. E.g. 'venus'"), 
+	planetb: str = typer.Argument(..., help="The second planet. E.g. 'sun'"),
+	days: int = typer.Option(7, help="The amount of days to step through"),
+	step: int = typer.Option(12, help="The amount of hours to step by")):
 	"""
 	Generates various charts
 	"""
 	planeta, planetb = correctPlanetNames([planeta, planetb])
-	generateElongationChart(planeta, planetb)
+	generateElongationChart(planeta, planetb, days=days, step=step)
 
 if __name__ == "__main__":
 	main()
