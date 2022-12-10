@@ -1,0 +1,11 @@
+Skyfield:
+	https://rhodesmill.org/skyfield/
+
+Great metarepository containing a bunch of useful libraries etc:
+	https://github.com/orbitalindex/awesome-space
+
+Alternative for typescript/node/etc:
+	https://www.npmjs.com/package/astronomy-engine?activeTab=readme
+
+Possibly useful later in dev:
+	https://docs.astropy.org/en/stable/
