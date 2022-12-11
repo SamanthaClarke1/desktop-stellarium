@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 
 import typer
-from index import findSunSetRise, findPlanetRadius, findGreatestElongation, generateElongationChart
+from index import findSunSetRise, findPlanetRadius, findGreatestElongation, generateElongationChart, checkWhenPlanetInSky
 from rich import print
 from helpers import loadConfig, PLANET_RADII, checkPlanetsSupport, correctPlanetNames
 
@@ -12,22 +12,56 @@ planetsArg = typer.Argument(..., help="A comma seperated list of planets. E.g. '
 eventsArg = typer.Argument(..., help="Comma seperated name of events to query. E.g. 'rise,set'")
 
 @main.command()
-def when(planets: str = planetsArg, events: str = eventsArg):
+def when(planets: str = planetsArg,
+	events: str = eventsArg,
+	format: str = typer.Option('%a %d %H:%M', help='Strftime format string. E.g. %d %H:%M'), 
+	search: int = typer.Option(24, help='Number of hours to search ahead.')):
 	"""
 	Find out when certain [EVENTS] happen with [PLANETS]
 	"""
 	planets = planets.split(',')
 	events = events.split(',')
 
-	if not checkPlanetsSupport(planets, True):
+	if not checkPlanetsSupport(planets):
 		return
 
 	for planet in planets:
-		if(planet == 'sun'):
-			Set, Rise = findSunSetRise()
-			for event in events:
-				if(event == 'set'): print(str(Set.time())[:8])
-				if(event == 'rise'): print(str(Rise.time())[:8])
+		for event in events:
+			if(event in ['set', 'rise']):
+				sets, rises = checkWhenPlanetInSky(planet)
+				if event == 'set': print(sets.strftime(format))
+				if event == 'rise': print(rises.strftime(format))
+			else:
+				print("ERROR: Invalid event", event)
+
+@main.command()
+def is_star(planets: str = planetsArg, star_type = typer.Argument("evening", help="'evening' | 'morning' - check if evening star or morning star")):
+	"""
+	Checks if a star is an evening or morning star.
+	"Evening star" meaning that it sets after the sun, and is visible at night.
+	"Morning star" meaning that it rises before the sun, and is visible in early morning.
+	"""
+	planets = planets.split(',')
+
+	if not checkPlanetsSupport(planets):
+		return
+
+	sunset, sunrise = checkWhenPlanetInSky('sun')
+	# we replace the year, month, and days here so that we're comparing time of day- not TIME.
+	sunset = sunset.replace(year=2000, month=1, day=1) 
+	sunrise = sunrise.replace(year=2000, month=1, day=1)
+
+	for planet in planets:
+		planetset, planetrise = checkWhenPlanetInSky(planet)
+		planetset = planetset.replace(year=2000, month=1, day=1)
+		planetrise = planetrise.replace(year=2000, month=1, day=1)
+		if(star_type == "evening"):
+			if(sunset < planetset): print(planet, "is currently an evening star. It sets", planetset-sunset, "later")
+			else: print(planet, "is not currently an evening star.")
+		if(star_type == "morning"):
+			if(sunrise > planetrise): print(planet, "is currently a morning star. It rises", sunrise-planetrise, "earlier")
+			else: print(planet, "is not currently a morning star.")
+
 
 @main.command()
 def place(planets: str = planetsArg):

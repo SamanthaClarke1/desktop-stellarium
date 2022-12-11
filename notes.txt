@@ -9,3 +9,7 @@ Alternative for typescript/node/etc:
 
 Possibly useful later in dev:
 	https://docs.astropy.org/en/stable/
+	http://www.strudel.org.uk/lookUP/about.html
+	http://simbad.u-strasbg.fr/simbad/
+
+I should *really* introduce better formatting to actually make this easy to use with conky, huh?

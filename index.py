@@ -5,10 +5,11 @@ import datetime as dt
 from uniplot import plot
 from datetime import timedelta
 from skyfield import almanac
-from skyfield.api import load, Angle
+from skyfield.api import load, Angle, Star
 from skyfield.framelib import ecliptic_frame
 from skyfield.searchlib import find_maxima
-from helpers import loadConfig, getNow, getPosition, PLANET_RADII
+from skyfield.almanac import find_discrete, risings_and_settings
+from helpers import loadConfig, getNow, getPosition, PLANET_RADII, correctPlanetNames
 
 CONFIG = loadConfig()
 eph = load('de421.bsp')
@@ -88,4 +89,20 @@ def generateElongationChart(planet1Name, planet2Name, eph=eph, days=60, step=24*
 	plot(elongations, title="Distance between "+planet1Name+" and "+planet2Name+" as viewed from earth.", y_unit='°', lines=True)
 
 
+def checkWhenPlanetInSky(planet, h=24):
+	now, zone = getNow(CONFIG)
+	t0 = ts.from_datetime(now)
+	t1 = ts.from_datetime(now + timedelta(hours=h))
 
+	moab = getPosition(CONFIG)
+	planet = correctPlanetNames([planet])[0]
+	gc = eph[planet]
+
+	f = risings_and_settings(eph, gc, moab)
+
+	sets, rises = None, None
+	for t, updown in zip(*find_discrete(t0, t1, f)):
+		if updown: rises = t.astimezone(zone)
+		else: sets = t.astimezone(zone)
+
+	return sets, rises
