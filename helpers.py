@@ -4,6 +4,7 @@ import json
 from pytz import timezone
 import datetime as dt
 from skyfield.api import wgs84
+import math
 
 # CONSTANTS
 PLANET_RADII = {
@@ -40,8 +41,9 @@ def planetSupported(planet, sm=False):
 	if(sm): return planet == "sun" or planet == "moon"
 	else: return planet in PLANET_RADII.keys()
 
-def getPosition(CONFIG):
-	position = wgs84.latlon(CONFIG['lat'], CONFIG['long'], CONFIG['elevation'])
+def getPosition(CONFIG, elevation=-1):
+	if(elevation == -1): elevation = CONFIG['elevation']
+	position = wgs84.latlon(CONFIG['lat'], CONFIG['long'], elevation)
 	return position
 
 def getNow(CONFIG):
@@ -69,3 +71,8 @@ def loadConfig(f="./config.json"):
 def tryOverrideA(a, b, k):
 	if b[k]: return b[k]
 	return a[k]
+
+def angleComparedToRVec(vec, rvec=[1,0]):
+	lvec = math.sqrt(vec[0]*vec[0]+vec[1]*vec[1])
+	deg = math.degrees(math.acos(vec[0]/lvec))
+	return deg if vec[1] >= 0 else 360-deg

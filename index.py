@@ -9,7 +9,7 @@ from skyfield.api import load, Angle, Star
 from skyfield.framelib import ecliptic_frame
 from skyfield.searchlib import find_maxima
 from skyfield.almanac import find_discrete, risings_and_settings
-from helpers import loadConfig, getNow, getPosition, PLANET_RADII, correctPlanetNames
+from helpers import loadConfig, getNow, getPosition, PLANET_RADII, correctPlanetNames, angleComparedToRVec
 
 CONFIG = loadConfig()
 eph = load('de421.bsp')
@@ -88,14 +88,64 @@ def generateElongationChart(planet1Name, planet2Name, eph=eph, days=60, step=24*
 
 	plot(elongations, title="Distance between "+planet1Name+" and "+planet2Name+" as viewed from earth.", y_unit='°', lines=True)
 
+def graphPlacesInSky(planetNames, size=20, use_ra=False, pad=6, horiz_empt='x', vert_empt='|', display_you=True):
+	now, zone = getNow(CONFIG)
+	t = ts.from_datetime(now)
+	moab = getPosition(CONFIG)
 
-def checkWhenPlanetInSky(planet, h=24):
+	planetPositions = []
+	for planetName in planetNames:
+		planet, earth = eph[planetName], eph['earth']
+		vpos = (earth + moab).at(t) # vpos = viewers position
+		a = vpos.observe(planet).apparent()
+		ra, dec, dist = a.radec()
+		deg = ra._degrees if use_ra else dec._degrees
+		deg = deg if deg >= 0 else deg+360
+		planetPositions.append([planetName, deg, ra._degrees, dec._degrees, round(dist.km/100000)/10])
+
+	xyPositions = []
+	for x in range(-size, size): #
+		xyPositions.append([x,  size, angleComparedToRVec([x,  size])])
+		xyPositions.append([x, -size, angleComparedToRVec([x, -size])])
+	for y in range(-size, size):
+		xyPositions.append([ size, y, angleComparedToRVec([ size, y])])
+		xyPositions.append([-size, y, angleComparedToRVec([-size, y])])
+	def takeDeg(e): return e[2]
+	xyPositions.sort(key=takeDeg)
+
+	BUF = []
+	for y in range(0, size*2+2):
+		BUF.append(['  ' for i in range(0, pad*2+size*2)])
+
+	pdeg = xyPositions[-1][2] # previous degree grabbed from last xypos
+	for pos in xyPositions:
+		tx, ty = (pos[0]+size+pad, pos[1]+size)
+		couldFindPlanet = False
+		for ppos in planetPositions:
+			if(ppos[1] > pdeg and ppos[1] < pos[2]):
+				tstr = ppos[0][:5] + ", " + str(ppos[4]) + " mkm away"
+				BUF[ty][tx-6:tx+6] = list(tstr[:24].ljust(24))
+				couldFindPlanet = True
+
+		if not couldFindPlanet:
+			if ty == size*2 or ty == 0: BUF[ty][tx] = ' '+horiz_empt
+			else: BUF[ty][tx] = ' '+vert_empt
+
+		pdeg = pos[2]
+	if(display_you): BUF[size][size+pad-1:size+pad+3] = list(' you <3 ')
+	BUF[size*2][size*2+pad] = ' '+horiz_empt
+	
+	print('\n'.join(''.join(innerBUF) for innerBUF in BUF))
+
+
+
+def checkWhenPlanetInSky(planetName, h=24):
 	now, zone = getNow(CONFIG)
 	t0 = ts.from_datetime(now)
 	t1 = ts.from_datetime(now + timedelta(hours=h))
 
 	moab = getPosition(CONFIG)
-	planet = correctPlanetNames([planet])[0]
+	planet = correctPlanetNames([planetName])[0]
 	gc = eph[planet]
 
 	f = risings_and_settings(eph, gc, moab)

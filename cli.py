@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 
 import typer
-from index import findSunSetRise, findPlanetRadius, findGreatestElongation, generateElongationChart, checkWhenPlanetInSky
+from index import findSunSetRise, graphPlacesInSky, findPlanetRadius, findGreatestElongation, generateElongationChart, checkWhenPlanetInSky
 from rich import print
 from helpers import loadConfig, PLANET_RADII, checkPlanetsSupport, correctPlanetNames
 
@@ -104,13 +104,33 @@ def find_elongation(planeta: str = typer.Argument(..., help="The first planet. E
 	findGreatestElongation(planeta, planetb)
 
 @main.command()
-def chart(chart = typer.Argument(..., help="The name of the chart. E.g. elongation"), 
-	planeta: str = typer.Argument(..., help="The first planet. E.g. 'venus'"), 
+def see_planets(planets: str = planetsArg,
+	size: int = typer.Option(7, help="The size of the chart"),
+	pad: int = typer.Option(15, help="The padding around the sides of the chart"),
+	horiz_empt: str = typer.Option('x', help="The horizontal empty chart character"),
+	vert_empt: str = typer.Option('x', help="The horizontal empty chart character"),
+	display_you: bool = typer.Option(False, help="Whether or not to display 'you <3' in the centre of the chart"),
+	use_ra: bool = typer.Option(False, help="Use RA or DEC")):
+	"""
+	Generates a visualisation of the planets in the night sky, based on their angle from the observer.
+	"""
+	planets = planets.split(',')
+
+	if not checkPlanetsSupport(planets, False):
+		return
+	planets = correctPlanetNames(planets)
+
+	print()
+	graphPlacesInSky(planets, size, use_ra, pad, horiz_empt, vert_empt, display_you)
+
+
+@main.command()
+def elong_chart(planeta: str = typer.Argument(..., help="The first planet. E.g. 'venus'"), 
 	planetb: str = typer.Argument(..., help="The second planet. E.g. 'sun'"),
 	days: int = typer.Option(7, help="The amount of days to step through"),
 	step: int = typer.Option(12, help="The amount of hours to step by")):
 	"""
-	Generates various charts
+	Generates a chart showing the distance between two planets over time
 	"""
 	planeta, planetb = correctPlanetNames([planeta, planetb])
 	generateElongationChart(planeta, planetb, days=days, step=step)
