@@ -124,7 +124,7 @@ def graphPlacesInSky(planetNames, size=20, use_ra=False, pad=6, horiz_empt='x', 
 		for ppos in planetPositions:
 			if(ppos[1] > pdeg and ppos[1] < pos[2]):
 				tstr = ppos[0][:5] + ", " + str(ppos[4]) + " mkm away"
-				BUF[ty][tx-6:tx+6] = list(tstr[:24].ljust(24))
+				BUF[ty][tx-6:tx+6] = list(tstr[:24].center(24, ' '))
 				couldFindPlanet = True
 
 		if not couldFindPlanet:
