@@ -16,7 +16,8 @@ PLANET_RADII = {
 	"earth": 6371,
 	"saturn": 58232,
 	"venus": 6051.8,
-	"sun": 1392700
+	"sun": 1392700,
+	"pluto": 1188.3
 }
 
 # FUNCS

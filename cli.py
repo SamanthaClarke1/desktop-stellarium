@@ -109,11 +109,11 @@ def see_planets(planets: str = planetsArg,
 	pad: int = typer.Option(15, help="The padding around the sides of the chart"),
 	horiz_empt: str = typer.Option('.', help="The horizontal empty chart character"),
 	vert_empt: str = typer.Option('.', help="The horizontal empty chart character"),
-	display_you: bool = typer.Option(False, help="Whether or not to display 'you <3' in the centre of the chart"),
+	display_you: bool = typer.Option(True, help="Whether or not to display 'you <3' in the centre of the chart"),
 	use_ra: bool = typer.Option(False, help="Use RA or DEC")):
 	"""
 	Generates a visualisation of the planets in the night sky, based on their angle from the observer.
-	e.g. see-planets venus,mars,sun,jupiter --size=7 --horiz-empt=x --vert-empt=x --pad=10
+	e.g. see-planets venus,mars,sun,pluto --size=7 --horiz-empt=x --vert-empt=x --pad=10
 	"""
 	planets = planets.split(',')
 
