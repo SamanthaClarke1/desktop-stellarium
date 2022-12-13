@@ -13,5 +13,3 @@ Possibly useful later in dev:
 	http://simbad.u-strasbg.fr/simbad/
 
 I should *really* introduce better formatting to actually make this easy to use with conky, huh?
-
-reminder to self to fix the chart displaying planets over other planets
