@@ -107,6 +107,7 @@ def find_elongation(planeta: str = typer.Argument(..., help="The first planet. E
 def see_planets(planets: str = planetsArg,
 	size: int = typer.Option(7, help="The size of the chart"),
 	pad: int = typer.Option(15, help="The padding around the sides of the chart"),
+	vpad: int = typer.Option(3, help="The padding above and below the chart"),
 	horiz_empt: str = typer.Option('.', help="The horizontal empty chart character"),
 	vert_empt: str = typer.Option('.', help="The horizontal empty chart character"),
 	display_you: bool = typer.Option(True, help="Whether or not to display 'you <3' in the centre of the chart"),
@@ -121,8 +122,7 @@ def see_planets(planets: str = planetsArg,
 		return
 	planets = correctPlanetNames(planets)
 
-	print()
-	graphPlacesInSky(planets, size, use_ra, pad, horiz_empt, vert_empt, display_you)
+	graphPlacesInSky(planets, size, use_ra, pad, vpad, horiz_empt, vert_empt, display_you)
 
 
 @main.command()

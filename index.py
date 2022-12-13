@@ -88,7 +88,7 @@ def generateElongationChart(planet1Name, planet2Name, eph=eph, days=60, step=24*
 
 	plot(elongations, title="Distance between "+planet1Name+" and "+planet2Name+" as viewed from earth.", y_unit='°', lines=True)
 
-def graphPlacesInSky(planetNames, size=20, use_ra=False, pad=6, horiz_empt='x', vert_empt='|', display_you=True):
+def graphPlacesInSky(planetNames, size=20, use_ra=False, pad=6, vpad=2, horiz_empt='x', vert_empt='|', display_you=True):
 	now, zone = getNow(CONFIG)
 	t = ts.from_datetime(now)
 	moab = getPosition(CONFIG)
@@ -114,26 +114,44 @@ def graphPlacesInSky(planetNames, size=20, use_ra=False, pad=6, horiz_empt='x', 
 	xyPositions.sort(key=takeDeg)
 
 	BUF = []
-	for y in range(0, size*2+2):
+	for y in range(0, size*2+vpad*2):
 		BUF.append(['  ' for i in range(0, pad*2+size*2)])
 
 	pdeg = xyPositions[-1][2] # previous degree grabbed from last xypos
+	hasDisplayedTop = 0 # record when it displays top/bottom so it can put the labels ABOVE the other labels, instead of THROUGH them
+	hasDisplayedBot = 0
 	for pos in xyPositions:
 		tx, ty = (pos[0]+size+pad, pos[1]+size)
-		couldFindPlanet = False
+		planetsToPutHere = []
 		for ppos in planetPositions:
-			if(ppos[1] > pdeg and ppos[1] < pos[2]):
-				tstr = ppos[0][:5] + ", " + str(ppos[4]) + " mkm away"
-				BUF[ty][tx-6:tx+6] = list(tstr[:24].center(24, ' '))
-				couldFindPlanet = True
+			if(ppos[1] > pdeg and ppos[1] < pos[2]): # planet should be put here!
+				planetsToPutHere.append(ppos)
 
-		if not couldFindPlanet:
-			if ty == size*2 or ty == 0: BUF[ty][tx] = ' '+horiz_empt
-			else: BUF[ty][tx] = ' '+vert_empt
+		if len(planetsToPutHere) == 0:
+			if ty == size*2 or ty == 0: BUF[ty+vpad][tx] = ' '+horiz_empt
+			else: BUF[ty+vpad][tx] = ' '+vert_empt
+		else: # planet found! generate a planet string!
+			ppos = planetsToPutHere[0]
+			tstr = ppos[0][:5] + ", " + str(ppos[4]) + " mkm away"
+			if len(planetsToPutHere) > 1: tstr += " +" + str(len(planetsToPutHere)-1)
+			
+			BUF[ty+vpad][tx] = ' '+'X' #str(len(planetsToPutHere))
+			# now insert the str
+			offset = 1 if ty == size*2 else -1 if ty == 0 else 0
+			noff = offset + vpad + (hasDisplayedBot if ty == size*2 else -hasDisplayedTop if ty == 0 else 0)
+			if offset == -1: hasDisplayedTop += 1
+			if offset ==  1: hasDisplayedBot += 1
+
+			roff, loff = (6, -6)
+			if tx-pad == size*2: roff, loff = (14, 2) # on display right
+			if tx-pad == 0: roff, loff = (2, 14) # on display left
+			tStrAligned = tstr[:24].center(24, ' ') if roff == 6 else tstr[:24].ljust(24, ' ') if roff == 2 else tstr[:24].rjust(24, ' ')
+
+			BUF[ty+noff][tx+loff:tx+roff] = list(tStrAligned)
 
 		pdeg = pos[2]
-	if(display_you): BUF[size][size+pad-1:size+pad+3] = list(' you <3 ')
-	BUF[size*2][size*2+pad] = ' '+horiz_empt
+	if(display_you): BUF[size+vpad][size+pad-1:size+pad+3] = list(' you <3 ')
+	BUF[size*2+vpad][size*2+pad] = ' '+horiz_empt
 	
 	print('\n'.join(''.join(innerBUF) for innerBUF in BUF))
 
